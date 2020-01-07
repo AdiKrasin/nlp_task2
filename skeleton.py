@@ -6,6 +6,7 @@ from collections import defaultdict
 import gzip
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.naive_bayes import GaussianNB
 
 
 #### Q1.1 Evaluation Metrics ####
@@ -243,7 +244,7 @@ def word_frequency_threshold(training_file, development_file, counts):
         all_frequencies.append(counts[word])
 
     for n in range(1, 11):
-        training_range.append(np.sum(all_frequencies[:int(n*len(all_frequencies)/10)]))
+        training_range.append(np.sum(all_frequencies[:int(n*len(all_frequencies)/10)])/len(all_frequencies[:int(n*len(all_frequencies)/10)]))
 
     maximizer = 0
     max_fscore = -1
@@ -313,7 +314,40 @@ def word_frequency_threshold(training_file, development_file, counts):
 
 ## Trains a Naive Bayes classifier using length and frequency features
 def naive_bayes(training_file, development_file, counts):
-    ## YOUR CODE HERE
+
+    train_data = load_file(training_file)
+    development_data = load_file(development_file)
+    train_lables = train_data[1]
+    train_words = train_data[0]
+    develop_lables = development_data[1]
+    develop_words = development_data[0]
+
+    clf = GaussianNB()
+    mean = np.mean(zip(np.array([len(word) for word in train_words]), np.array(counts[word] for word in train_words)))
+    sd = np.std(zip(np.array([len(word) for word in train_words]), np.array(counts[word] for word in train_words)))
+
+    def scaling(x):
+        return (x - mean)/sd
+
+    X_train = zip(np.array([len(word) for word in train_words]), np.array(counts[word] for word in train_words))
+    np.apply_along_axis(scaling, axis=1, arr=X_train)
+    X_develop = zip(np.array([len(word) for word in develop_words]), np.array([counts[word] for word in develop_words]))
+    np.apply_along_axis(scaling, axis=1, arr=X_develop)
+    Y = np.array(train_lables)
+    clf.fit(X_train, Y)
+
+    Y_pred = clf.predict(X_train)
+
+    tprecision = get_precision(Y_pred, train_lables)
+    trecall = get_recall(Y_pred, train_lables)
+    tfscore = get_fscore(Y_pred, train_lables)
+
+    Y_pred = clf.predict(X_develop)
+
+    dprecision = get_precision(Y_pred, develop_lables)
+    drecall = get_recall(Y_pred, develop_lables)
+    dfscore = get_fscore(Y_pred, develop_lables)
+
     training_performance = [tprecision, trecall, tfscore]
     development_performance = [dprecision, drecall, dfscore]
     return training_performance, development_performance
@@ -339,3 +373,6 @@ if __name__ == "__main__":
     dic = load_ngram_counts('../ngram_counts.txt.gz')
     print(word_frequency_threshold(training_file, development_file, dic))
     '''
+    # this is just for 1.3.1
+    dic = load_ngram_counts('../ngram_counts.txt.gz')
+    print(naive_bayes(training_file, development_file, dic))
