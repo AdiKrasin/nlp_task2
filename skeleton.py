@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 import gzip
+import matplotlib.pyplot as plt
 
 
 #### Q1.1 Evaluation Metrics ####
@@ -130,7 +131,82 @@ def all_complex(data_file):
 ## Finds the best length threshold by f-score, and uses this threshold to
 ## classify the training and development set
 def word_length_threshold(training_file, development_file):
-    ## YOUR CODE HERE
+    train_data = load_file(training_file)
+    development_data = load_file(development_file)
+    train_lables = train_data[1]
+    train_words = train_data[0]
+    develop_lables = development_data[1]
+    develop_words = development_data[0]
+
+    # looking only in the relevant range - meaning len varying from 0 to longest word len + 1
+    longest_word_len = 0
+
+    for word in train_words:
+        if len(word) > longest_word_len:
+            longest_word_len = len(word)
+
+    training_range = range(longest_word_len + 2)
+    maximizer = 0
+    max_fscore = -1
+    recall_for_plot = []
+    precision_for_plot = []
+
+    # maximizing the fscore
+    for num in training_range:
+        y_pred = []
+        for word in train_words:
+            if len(word) >= num:
+                y_pred.append(1)
+            else:
+                y_pred.append(0)
+        fscore = get_fscore(train_lables, y_pred)
+        recall_for_plot.append(get_recall(train_lables, y_pred))
+        precision_for_plot.append(get_precision(train_lables, y_pred))
+        if fscore != 'inf' and fscore > max_fscore:
+            max_fscore = fscore
+            maximizer = num
+
+    for precision in precision_for_plot:
+        if precision == 'inf':
+            index = precision_for_plot.index(precision)
+            precision_for_plot.remove(precision)
+            recall_for_plot = recall_for_plot[:index] + recall_for_plot[index+1:]
+    for recall in recall_for_plot:
+        if recall == 'inf':
+            index = recall_for_plot.index(recall)
+            recall_for_plot.remove(recall)
+            precision_for_plot = precision_for_plot[:index] + precision_for_plot[index+1:]
+
+    plt.plot(recall_for_plot, precision_for_plot, color='green', linestyle='dashed', linewidth=3, marker='o',
+             markerfacecolor='blue', markersize=12)
+    plt.ylabel('precision')
+    plt.xlabel('recall')
+    plt.ylim = max(precision_for_plot)
+    plt.xlim = max(recall_for_plot)
+    plt.show()
+
+    y_pred = []
+    for word in train_words:
+        if len(word) >= maximizer:
+            y_pred.append(1)
+        else:
+            y_pred.append(0)
+
+    tprecision = get_precision(y_pred, train_lables)
+    trecall = get_recall(y_pred, train_lables)
+    tfscore = get_fscore(y_pred, train_lables)
+
+    y_pred = []
+    for word in develop_words:
+        if len(word) >= maximizer:
+            y_pred.append(1)
+        else:
+            y_pred.append(0)
+
+    dprecision = get_precision(y_pred, develop_lables)
+    drecall = get_recall(y_pred, develop_lables)
+    dfscore = get_fscore(y_pred, develop_lables)
+
     training_performance = [tprecision, trecall, tfscore]
     development_performance = [dprecision, drecall, dfscore]
     return training_performance, development_performance
@@ -173,6 +249,11 @@ if __name__ == "__main__":
     development_file = "../data/complex_words_development.txt"
     test_file = "../data/complex_words_test_unlabeled.txt"
     train_data = load_file(training_file)
+    '''
+    # this is just for 1.2.1
     development_data = load_file(development_file)
     print(all_complex(train_data))
     print(all_complex(development_data))
+    '''
+    # this is just for 1.2.2
+    print(word_length_threshold(training_file, development_file))
