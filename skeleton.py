@@ -323,16 +323,16 @@ def naive_bayes(training_file, development_file, counts):
     develop_words = development_data[0]
 
     clf = GaussianNB()
-    mean = np.mean(zip(np.array([len(word) for word in train_words]), np.array(counts[word] for word in train_words)))
-    sd = np.std(zip(np.array([len(word) for word in train_words]), np.array(counts[word] for word in train_words)))
+    mean_feature1 = np.mean(np.array([len(word) for word in train_words]))
+    mean_feature2 = np.mean(np.array([counts[word] for word in train_words]))
+    sd_feature1 = np.std(np.array([len(word) for word in train_words]))
+    sd_feature2 = np.std(np.array([counts[word] for word in train_words]))
 
-    def scaling(x):
-        return (x - mean)/sd
-
-    X_train = zip(np.array([len(word) for word in train_words]), np.array(counts[word] for word in train_words))
-    np.apply_along_axis(scaling, axis=1, arr=X_train)
-    X_develop = zip(np.array([len(word) for word in develop_words]), np.array([counts[word] for word in develop_words]))
-    np.apply_along_axis(scaling, axis=1, arr=X_develop)
+    # todo need to make sure that this is how i am supposed to normalize the values
+    X_train = np.column_stack((np.array([(len(word) - mean_feature1) / sd_feature1 for word in train_words]),
+                              np.array([(counts[word] - mean_feature2) / sd_feature2 for word in train_words])))
+    X_develop = np.column_stack((np.array([(len(word) - mean_feature1) / sd_feature1 for word in develop_words]),
+                              np.array([(counts[word] - mean_feature2) / sd_feature2 for word in develop_words])))
     Y = np.array(train_lables)
     clf.fit(X_train, Y)
 
