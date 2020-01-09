@@ -313,7 +313,7 @@ def word_frequency_threshold(training_file, development_file, counts):
 ### 1.3.1: Naive Bayes
 
 ## Trains a Naive Bayes classifier using length and frequency features
-def naive_bayes(training_file, development_file, counts):
+def naive_bayes(training_file, development_file, counts, return_labels_and_words=False):
 
     train_data = load_file(training_file)
     development_data = load_file(development_file)
@@ -350,7 +350,10 @@ def naive_bayes(training_file, development_file, counts):
 
     training_performance = [tprecision, trecall, tfscore]
     development_performance = [dprecision, drecall, dfscore]
-    return training_performance, development_performance
+    if not return_labels_and_words:
+        return training_performance, development_performance
+    else:
+        return Y_pred, develop_words
 
 
 if __name__ == "__main__":
@@ -373,6 +376,21 @@ if __name__ == "__main__":
     dic = load_ngram_counts('../ngram_counts.txt.gz')
     print(word_frequency_threshold(training_file, development_file, dic))
     '''
+    '''
     # this is just for 1.3.1
     dic = load_ngram_counts('../ngram_counts.txt.gz')
     print(naive_bayes(training_file, development_file, dic))
+    '''
+    # this is just for 1.4
+    dic = load_ngram_counts('../ngram_counts.txt.gz')
+    pred_labels, development_words = naive_bayes(training_file, development_file, dic, True)
+    pred_dic = dict()
+    index = 0
+    for word in development_words:
+        if word not in pred_dic:
+            pred_dic[word] = pred_labels[index]
+        else:
+            if pred_dic[word] != pred_labels[index]:
+                print('this word: {} got this label: {} and also this label: {}'.format(word, pred_dic[word],
+                                                                                        pred_labels[index]))
+        index += 1
