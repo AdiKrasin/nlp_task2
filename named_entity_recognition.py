@@ -117,8 +117,8 @@ lr.fit(np.array(X_train), np.array(y_train))
 
 Y_pred = lr.predict(np.array(X_test))
 
-recall = recall_score(y_test, Y_pred, average='weighted')
-precision = precision_score(y_test, Y_pred, average='weighted')
+recall = recall_score(y_test, Y_pred, average='weighted', zero_division=1)
+precision = precision_score(y_test, Y_pred, average='weighted', zero_division=1)
 fscore = (2 * precision * recall) / (precision + recall)
 
 performance = [precision, recall, fscore]
