@@ -110,12 +110,16 @@ print(performance)
 
 # this is just for 3.1.3
 
-new_train_sents = list(conll2002.iob_sents('esp.train'))
+new_test_sents = list(conll2002.iob_sents('esp.testb'))
+
+# todo i probably need to check this is Y-pred, problem is my Y-pred has no BIO tags because of the chuncks
+# todo might need to do everything again just with the iob_sents instead of the chuncks to get the tags, run it again
+#  and check (need to once again make the vectors fit but at least now i somewhat know how to work with it)
 
 illegal_combinations = {'o-ix': 0, 'ix-iy': 0, 'bx-iy': 0}
 
 out_side_index = 0
-for sent in new_train_sents:
+for sent in new_test_sents:
     index = 0
     for element in sent:
         if index and index < len(sent) - 1:
@@ -126,8 +130,8 @@ for sent in new_train_sents:
             elif element[2][0] == 'B' and sent[index+1][2][0] == "I" and element[2][1] != sent[index+1][2][1]:
                 illegal_combinations['bx-iy'] += 1
         elif index == len(sent) - 1:
-            if out_side_index < len(new_train_sents) - 1:
-                new_train_sents[out_side_index + 1] = [element] + new_train_sents[out_side_index + 1]
+            if out_side_index < len(new_test_sents) - 1:
+                new_test_sents[out_side_index + 1] = [element] + new_test_sents[out_side_index + 1]
         index += 1
     out_side_index += 1
 
