@@ -7,35 +7,17 @@ from sklearn.metrics import precision_score
 
 def word2features(sent, i):
     postag = sent[i][0][1]
-    not_found = True
-    j = i-1
-    while not_found:
-        try:
-            if type(sent[j]) != tuple:
-                old_postag = sent[i-1][0][1]
-                not_found = False
-        except Exception as e:
-            if j < 0:
-                old_postag = 0
-                not_found = False
-        j -= 1
-        continue
-    not_found = True
-    j = i+1
-    while not_found:
-        try:
-            if type(sent[j]) != tuple:
-                next_postag = sent[i-1][0][1]
-                not_found = False
-        except Exception as e:
-            if j >= len(sent):
-                next_postag = 0
-                not_found = False
-        j += 1
-        continue
+    try:
+        old_postag = sent[i-1][0][1]
+    except Exception as e:
+        old_postag = 'O'
+    try:
+        next_postag = sent[i+1][0][1]
+    except Exception as e:
+        next_postag = 'O'
     features = [
-        0 if not old_postag else float(''.join(format(ord(x), 'b') for x in old_postag)),
-        0 if not next_postag else float(''.join(format(ord(x), 'b') for x in next_postag)),
+        float(''.join(format(ord(x), 'b') for x in old_postag)),
+        float(''.join(format(ord(x), 'b') for x in next_postag)),
         float(''.join(format(ord(x), 'b') for x in postag))
     ]
     return features
@@ -103,7 +85,7 @@ for index in range(len(X_test[0])):
 y_test = [sent2labels(s) for s in test_sents]
 y_test = [item for sublist in y_test for item in sublist]
 
-
+'''
 # from here on just for 3.1.2
 
 lr = LogisticRegression()
@@ -124,3 +106,24 @@ fscore = (2 * precision * recall) / (precision + recall)
 performance = [precision, recall, fscore]
 
 print(performance)
+'''
+
+# this is just for 3.1.3
+
+new_train_sents = list(conll2002.iob_sents('esp.train'))
+
+illegal_combinations = {'o-ix': 0, 'ix-iy': 0, 'bx-iy': 0}
+
+for sent in new_train_sents:
+    index = 0
+    for element in sent:
+        if index and index < len(sent) - 1:
+            if element[2] == 'O' and sent[index+1][2][0] == 'I':
+                illegal_combinations['o-ix'] += 1
+            elif element[2][0] == 'I' and sent[index+1][2][0] == 'I' and element[2][1] != sent[index+1][2][1]:
+                illegal_combinations['ix-iy'] += 1
+            elif element[2][0] == 'B' and sent[index+1][2][0] == "I" and element[2][1] != sent[index+1][2][1]:
+                illegal_combinations['bx-iy'] += 1
+        index += 1
+
+print(illegal_combinations)
