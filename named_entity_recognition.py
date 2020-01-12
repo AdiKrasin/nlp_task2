@@ -114,6 +114,7 @@ new_train_sents = list(conll2002.iob_sents('esp.train'))
 
 illegal_combinations = {'o-ix': 0, 'ix-iy': 0, 'bx-iy': 0}
 
+out_side_index = 0
 for sent in new_train_sents:
     index = 0
     for element in sent:
@@ -124,6 +125,10 @@ for sent in new_train_sents:
                 illegal_combinations['ix-iy'] += 1
             elif element[2][0] == 'B' and sent[index+1][2][0] == "I" and element[2][1] != sent[index+1][2][1]:
                 illegal_combinations['bx-iy'] += 1
+        elif index == len(sent) - 1:
+            if out_side_index < len(new_train_sents) - 1:
+                new_train_sents[out_side_index + 1] = [element] + new_train_sents[out_side_index + 1]
         index += 1
+    out_side_index += 1
 
 print(illegal_combinations)
