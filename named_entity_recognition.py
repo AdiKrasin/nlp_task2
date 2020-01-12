@@ -112,9 +112,11 @@ print(performance)
 
 new_test_sents = list(conll2002.iob_sents('esp.testb'))
 
-# todo i probably need to check this is Y-pred, problem is my Y-pred has no BIO tags because of the chuncks
+# todo i probably need to check this with Y-pred, problem is my Y-pred has no BIO tags because of the chuncks
 # todo might need to do everything again just with the iob_sents instead of the chuncks to get the tags, run it again
-#  and check (need to once again make the vectors fit but at least now i somewhat know how to work with it)
+#  and check (need to once again make the vectors fit but at least now i somewhat know how to work with it) + i will
+#  also need to test the O's - if this will work can try to change my code completely to work with this, or at least
+#  have two options
 
 illegal_combinations = {'o-ix': 0, 'ix-iy': 0, 'bx-iy': 0}
 
