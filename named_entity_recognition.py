@@ -10,11 +10,11 @@ def word2features(sent, i):
     if i:
         old_postag = sent[i-1][1]
     else:
-        old_postag = 'O'
+        old_postag = 'BOS'
     if i < len(sent) - 1:
         next_postag = sent[i+1][1]
     else:
-        next_postag = 'O'
+        next_postag = 'EOS'
     features = [
         float(''.join(format(ord(x), 'b') for x in old_postag)),
         float(''.join(format(ord(x), 'b') for x in next_postag)),
@@ -83,7 +83,7 @@ for index in range(len(X_train)):
 lr.fit(np.array(X_train), np.array(y_train))
 
 Y_pred = lr.predict(np.array(X_test))
-'''
+
 recall = recall_score(y_test, Y_pred, average='weighted', zero_division=1)
 precision = precision_score(y_test, Y_pred, average='weighted', zero_division=1)
 fscore = (2 * precision * recall) / (precision + recall)
@@ -91,7 +91,7 @@ fscore = (2 * precision * recall) / (precision + recall)
 performance = [precision, recall, fscore]
 
 print(performance)
-'''
+
 
 # this is just for 3.1.3
 
